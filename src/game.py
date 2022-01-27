@@ -58,6 +58,11 @@ def main():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         current_block.rotate(grid)
+                    if event.key == pygame.K_SPACE and not current_block.borders(grid)[2]:
+                        for i in range(GAME_HEIGHT):
+                            current_block.y += 1
+                            if current_block.borders(grid)[2]:
+                                break
         
         # move current block
         if game_time >= last_move + (1/gravity)*1000 and not current_block.borders(grid)[2]:
@@ -70,7 +75,7 @@ def main():
             move_time = game_time
         if pygame.key.get_pressed()[pygame.K_RIGHT] and not current_block.borders(grid)[0]:
             current_block.x += 1
-            move_time = game_time
+            move_time = game_time            
 
         # break lines
         y = GAME_HEIGHT
