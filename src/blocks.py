@@ -19,8 +19,6 @@ class Block():
         if self.rotation == 4:
             self.rotation = 0
         for cell in self.shapes[self.rotation]:
-            if grid[cell[0] + self.x, cell[1] + self.y - 1] != game.BACKGROUND_COLOR:
-                self.rotation -= 1
             try:
                 if grid[cell[0] + self.x, cell[1] + self.y + 1] != game.BACKGROUND_COLOR:
                     self.rotation -= 1
