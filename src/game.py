@@ -1,3 +1,4 @@
+from calendar import c
 import pygame, random, blocks, copy
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
@@ -25,9 +26,10 @@ def main():
         running = False
         pygame.quit()
 
+    next_block = copy.copy(random.choice(blocks.shapes))
+    current_block = copy.copy(random.choice(blocks.shapes))
     landed = False
     running = True
-    current_block = copy.copy(random.choice(blocks.shapes))
     # game loop
     while running:
         # check if landed
@@ -40,12 +42,13 @@ def main():
             if game_time >= land_time + 2000 or game_time >= move_time + 500:
                 for cell in current_block.shapes[current_block.rotation]:
                     grid[cell[0] + current_block.x, cell[1] + current_block.y] = current_block.color
-                current_block = copy.copy(random.choice(blocks.shapes))
+                current_block = next_block
                 for cell in current_block.shapes[current_block.rotation]:
                     if cell[1] + current_block.y >= 0:
                         if grid[cell[0] + current_block.x, cell[1] + current_block.y] != BACKGROUND_COLOR:
                             Lose()
-                landed = False
+                next_block = copy.copy(random.choice(blocks.shapes))
+                landed = False 
         elif landed == False:
             land_time = game_time
 
@@ -63,6 +66,9 @@ def main():
                             current_block.y += 1
                             if current_block.borders(grid)[2]:
                                 break
+                        landed=True
+                        move_time = game_time - 500
+                        land_time = game_time - 2000
         
         # move current block
         if game_time >= last_move + (1/gravity)*1000 and not current_block.borders(grid)[2]:
@@ -108,6 +114,9 @@ def main():
         for cell in current_block.shapes[current_block.rotation]:
             if cell[1] + current_block.y >= 0:
                 pygame.draw.rect(screen, current_block.color, pygame.Rect(grid_x + (cell[0] + current_block.x) * CELL_SIZE, grid_y + (cell[1] + current_block.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+        # draw next block
+        for cell in next_block.shapes[current_block.rotation]:
+            pygame.draw.rect(screen, next_block.color, pygame.Rect(1000 + cell[0] * CELL_SIZE, 200 + cell[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
         pygame.display.update()
         clock.tick(15)

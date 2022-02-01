@@ -20,20 +20,11 @@ class Block():
             self.rotation = 0
         for cell in self.shapes[self.rotation]:
             try:
-                if grid[cell[0] + self.x, cell[1] + self.y + 1] != game.BACKGROUND_COLOR:
-                    self.rotation -= 1
+                if grid[cell[0] + self.x, cell[1] + self.y] != game.BACKGROUND_COLOR :
+                    self.rotation = previous
             except:
-                self.rotation -= 1
-            try:
-                if grid[cell[0] + self.x + 1, cell[1] + self.y] != game.BACKGROUND_COLOR:
-                    self.rotation -= 1
-            except:
-                self.rotation -= 1
-            try:
-                if grid[cell[0] + self.x - 1, cell[1] + self.y] != game.BACKGROUND_COLOR:
-                    self.rotation -= 1
-            except:
-                self.rotation -= 1
+                self.rotation = previous
+        
     def borders(self, grid):
         border = [False, False, False]
         for cell in self.shapes[self.rotation]:
