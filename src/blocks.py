@@ -22,8 +22,11 @@ class Block():
             try:
                 if grid[cell[0] + self.x, cell[1] + self.y] != game.BACKGROUND_COLOR :
                     self.rotation = previous
-            except:
-                self.rotation = previous
+            except:         
+                print(cell[0] + self.x)
+                print(game.GAME_WIDTH-1)
+                if (cell[0] + self.x) < 0 or (cell[0] + self.x) > game.GAME_WIDTH-1 or (cell[1] + self.y) > game.GAME_HEIGHT-1:
+                    self.rotation = previous
         
     def borders(self, grid):
         border = [False, False, False]

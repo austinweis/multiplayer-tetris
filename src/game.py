@@ -1,4 +1,3 @@
-from calendar import c
 import pygame, random, blocks, copy
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
@@ -25,14 +24,24 @@ def main():
     def Lose():
         running = False
         pygame.quit()
+    def Shadow():
+        shadow = blocks.Block(current_block.shapes, (80, 80, 80))
+        shadow.x, shadow.y = current_block.x, current_block.y
+        shadow.rotation = current_block.rotation
+        for i in range(GAME_HEIGHT):
+            if shadow.borders(grid)[2]:
+                break
+            shadow.y += 1
+        return shadow
 
     next_block = copy.copy(random.choice(blocks.shapes))
     current_block = copy.copy(random.choice(blocks.shapes))
+
     landed = False
     running = True
     # game loop
     while running:
-        # check if landed
+        # check if landed 
         if current_block.borders(grid)[2] and landed == False:
             land_time = game_time
             move_time = game_time
@@ -61,11 +70,8 @@ def main():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_UP:
                         current_block.rotate(grid)
-                    if event.key == pygame.K_SPACE and not current_block.borders(grid)[2]:
-                        for i in range(GAME_HEIGHT):
-                            current_block.y += 1
-                            if current_block.borders(grid)[2]:
-                                break
+                    if event.key == pygame.K_SPACE:
+                        current_block.x, current_block.y = block_shadow.x, block_shadow.y
                         landed=True
                         move_time = game_time - 500
                         land_time = game_time - 2000
@@ -100,6 +106,7 @@ def main():
                 gravity+=0.1
                 y+=1
 
+        block_shadow = Shadow()
         # draw board
         for cell in grid.keys():
             # draw blocks
@@ -110,14 +117,16 @@ def main():
             pygame.draw.rect(screen, (80, 80, 80), 
                 pygame.Rect(grid_x + (cell[0] * CELL_SIZE), grid_y + (cell[1] * CELL_SIZE), 
                     CELL_SIZE, CELL_SIZE), width=2)
+        #draw block shadow
+        for cell in block_shadow.shapes[block_shadow.rotation]:
+            pygame.draw.rect(screen, (80, 80, 80), pygame.Rect(grid_x + (cell[0] + block_shadow.x) * CELL_SIZE, grid_y + (cell[1] + block_shadow.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
         # draw current block
         for cell in current_block.shapes[current_block.rotation]:
             if cell[1] + current_block.y >= 0:
                 pygame.draw.rect(screen, current_block.color, pygame.Rect(grid_x + (cell[0] + current_block.x) * CELL_SIZE, grid_y + (cell[1] + current_block.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
         # draw next block
-        for cell in next_block.shapes[current_block.rotation]:
+        for cell in next_block.shapes[next_block.rotation]:
             pygame.draw.rect(screen, next_block.color, pygame.Rect(1000 + cell[0] * CELL_SIZE, 200 + cell[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-
         pygame.display.update()
         clock.tick(15)
         game_time += clock.get_time()
