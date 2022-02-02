@@ -23,37 +23,36 @@ class Block():
                 if grid[cell[0] + self.x, cell[1] + self.y] != game.BACKGROUND_COLOR :
                     self.rotation = previous
             except:         
-                print(cell[0] + self.x)
-                print(game.GAME_WIDTH-1)
                 if (cell[0] + self.x) < 0 or (cell[0] + self.x) > game.GAME_WIDTH-1 or (cell[1] + self.y) > game.GAME_HEIGHT-1:
                     self.rotation = previous
         
     def borders(self, grid):
         border = [False, False, False]
         for cell in self.shapes[self.rotation]:
-            try:
-                if grid[cell[0] + self.x, cell[1] + self.y + 1] != game.BACKGROUND_COLOR:
+            if cell[1] + self.y >= 0:
+                try:
+                    if grid[cell[0] + self.x, cell[1] + self.y + 1] != game.BACKGROUND_COLOR:
+                        border[2] = True
+                except:
                     border[2] = True
-            except:
-                border[2] = True
-            try:
-                if grid[cell[0] + self.x + 1, cell[1] + self.y] != game.BACKGROUND_COLOR:
+                try:
+                    if grid[cell[0] + self.x + 1, cell[1] + self.y] != game.BACKGROUND_COLOR:
+                        border[0] = True
+                except:
                     border[0] = True
-            except:
-                border[0] = True
-            try:
-                if grid[cell[0] + self.x - 1, cell[1] + self.y] != game.BACKGROUND_COLOR:
+                try:
+                    if grid[cell[0] + self.x - 1, cell[1] + self.y] != game.BACKGROUND_COLOR:
+                        border[1] = True
+                except:
                     border[1] = True
-            except:
-                border[1] = True
                 
         return border
 
 I_SHAPE = [
 # rotation 1
-[(-2, 0), (-1, 0), (0, 0), (1, 0)], 
+[(-2, -1), (-1, -1), (0, -1), (1, -1)], 
 # rotation 2
-[(-1, -1), (-1, 0), (-1, 1), (-1, 2)],
+[(-1, -2), (-1, -1), (-1, 0), (-1, 1)],
 # rotation 3
 [(-2, 0), (-1, 0), (0, 0), (1, 0)], 
 # rotation 4,

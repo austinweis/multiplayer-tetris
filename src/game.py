@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import pygame, random, blocks, copy
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
