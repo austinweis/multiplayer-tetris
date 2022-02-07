@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import pygame, random, blocks, copy
+import pygame, random, blocks, copy, networking, sys
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 GAME_WIDTH, GAME_HEIGHT     = 10, 20
@@ -20,12 +20,13 @@ def main():
     clock = pygame.time.Clock()
     move_time, land_time, game_time, last_move = 0, 0, 0, 0
     gravity = 1 # spaces moved every second
-    grid_x, grid_y = (WINDOW_WIDTH-(CELL_SIZE * GAME_WIDTH))/2, (WINDOW_HEIGHT-(CELL_SIZE * GAME_HEIGHT))/2
+    grid_x, grid_y = 25, 25
+    remote_grid_x, remote_grid_y = 1000, 25
 
-    def Lose():
+    def lose():
         running = False
         pygame.quit()
-    def Shadow():
+    def shadow():
         shadow = blocks.Block(current_block.shapes, (80, 80, 80))
         shadow.x, shadow.y = current_block.x, current_block.y
         shadow.rotation = current_block.rotation
@@ -34,12 +35,15 @@ def main():
                 break
             shadow.y += 1
         return shadow
+    def start():
+        global running
+        remote = networking.start_server()
+        
+        running = True
 
     next_block = copy.copy(random.choice(blocks.shapes))
     current_block = copy.copy(random.choice(blocks.shapes))
-
     landed = False
-    running = True
     # game loop
     while running:
         # check if landed 
@@ -56,7 +60,7 @@ def main():
                 for cell in current_block.shapes[current_block.rotation]:
                     if cell[1] + current_block.y >= 0:
                         if grid[cell[0] + current_block.x, cell[1] + current_block.y] != BACKGROUND_COLOR:
-                            Lose()
+                            lose()
                 next_block = copy.copy(random.choice(blocks.shapes))
                 landed = False 
         elif landed == False:
@@ -107,7 +111,7 @@ def main():
                 gravity+=0.1
                 y+=1
 
-        block_shadow = Shadow()
+        block_shadow = shadow()
         # draw board
         for cell in grid.keys():
             # draw blocks
@@ -127,7 +131,7 @@ def main():
                 pygame.draw.rect(screen, current_block.color, pygame.Rect(grid_x + (cell[0] + current_block.x) * CELL_SIZE, grid_y + (cell[1] + current_block.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
         # draw next block
         for cell in next_block.shapes[next_block.rotation]:
-            pygame.draw.rect(screen, next_block.color, pygame.Rect(1000 + cell[0] * CELL_SIZE, 200 + cell[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            pygame.draw.rect(screen, next_block.color, pygame.Rect(640 + cell[0] * CELL_SIZE, 200 + cell[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
         pygame.display.update()
         clock.tick(15)
         game_time += clock.get_time()
