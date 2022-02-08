@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import pygame, random, blocks, copy, networking, sys
+import pygame, random, blocks, copy, networking, sys, threading
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 GAME_WIDTH, GAME_HEIGHT     = 10, 20
@@ -34,12 +34,7 @@ def main():
             if shadow.borders(grid)[2]:
                 break
             shadow.y += 1
-        return shadow
-    def start():
-        global running
-        remote = networking.start_server()
-        
-        running = True
+        return shadow     
 
     next_block = copy.copy(random.choice(blocks.shapes))
     current_block = copy.copy(random.choice(blocks.shapes))
@@ -137,4 +132,10 @@ def main():
         game_time += clock.get_time()
 
 if __name__ == "__main__":
+    global ip, port, server
+    ip = sys.argv[1]
+    port = sys.argv[2]
+    server = True if sys.argv[3] == "true" else False
+    
     main()
+
