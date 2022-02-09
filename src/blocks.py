@@ -27,23 +27,21 @@ class Block():
                     self.rotation = previous
         
     def borders(self, grid):
-        border = [False, False, False]
+        border = [False, False, False] #right, left, down
         for cell in self.shapes[self.rotation]:
             if cell[1] + self.y >= 0:
                 try:
-                    if grid[cell[0] + self.x, cell[1] + self.y + 1] != game.BACKGROUND_COLOR:
+                    if grid[cell[0] + self.x, cell[1] + self.y+1] != game.BACKGROUND_COLOR:
                         border[2] = True
                 except:
                     border[2] = True
-                try:
-                    if grid[cell[0] + self.x + 1, cell[1] + self.y] != game.BACKGROUND_COLOR:
-                        border[0] = True
-                except:
+                if (cell[0] + self.x + 1) > game.GAME_WIDTH-1:
                     border[0] = True
-                try:
-                    if grid[cell[0] + self.x - 1, cell[1] + self.y] != game.BACKGROUND_COLOR:
-                        border[1] = True
-                except:
+                elif grid[cell[0] + self.x + 1, cell[1] + self.y] != game.BACKGROUND_COLOR:
+                    border[0] = True
+                if (cell[0] + self.x - 1) < 0:
+                    border[1] = True
+                elif grid[cell[0] + self.x - 1, cell[1] + self.y] != game.BACKGROUND_COLOR:
                     border[1] = True
                 
         return border

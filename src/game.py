@@ -20,8 +20,8 @@ def main():
     clock = pygame.time.Clock()
     move_time, land_time, game_time, last_move = 0, 0, 0, 0
     gravity = 1 # spaces moved every second
-    grid_x, grid_y = 25, 25
-    remote_grid_x, remote_grid_y = 1000, 25
+    grid_x, grid_y = 50, 50
+    peer_grid_x, peer_grid_y = 930, 50
 
     def lose():
         running = False
@@ -38,9 +38,11 @@ def main():
 
     next_block = copy.copy(random.choice(blocks.shapes))
     current_block = copy.copy(random.choice(blocks.shapes))
+    running = True
     landed = False
     # game loop
     while running:
+        networking.send_data((grid, (current_block.color, current_block.shapes, current_block.x, current_block.y, current_block.rotation)))
         # check if landed 
         if current_block.borders(grid)[2] and landed == False:
             land_time = game_time
@@ -106,6 +108,8 @@ def main():
                 gravity+=0.1
                 y+=1
 
+        peer_grid = networking.peer_grid
+        peer_block = networking.peer_block
         block_shadow = shadow()
         # draw board
         for cell in grid.keys():
@@ -127,15 +131,43 @@ def main():
         # draw next block
         for cell in next_block.shapes[next_block.rotation]:
             pygame.draw.rect(screen, next_block.color, pygame.Rect(640 + cell[0] * CELL_SIZE, 200 + cell[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+
+        # draw peer board
+        for cell in peer_grid.keys():
+            # draw blocks
+            pygame.draw.rect(screen, peer_grid[cell], 
+                pygame.Rect(peer_grid_x + (cell[0] * CELL_SIZE), peer_grid_y + (cell[1] * CELL_SIZE), 
+                    CELL_SIZE, CELL_SIZE))
+            # draw grid
+            pygame.draw.rect(screen, (80, 80, 80), 
+                pygame.Rect(peer_grid_x + (cell[0] * CELL_SIZE), peer_grid_y + (cell[1] * CELL_SIZE), 
+                    CELL_SIZE, CELL_SIZE), width=2)
+            # draw current block
+            #current_block.color, current_block.shapes, current_block.x, current_block.y, current_block.rotation
+            for cell in peer_block[1][peer_block[4]]:
+                if cell[1] + peer_block[3] >= 0:
+                    pygame.draw.rect(screen, peer_block[0], pygame.Rect(peer_grid_x + (cell[0] + peer_block[2]) * CELL_SIZE, peer_grid_y + (cell[1] + peer_block[3]) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            
+
         pygame.display.update()
         clock.tick(15)
         game_time += clock.get_time()
 
 if __name__ == "__main__":
-    global ip, port, server
-    ip = sys.argv[1]
+    global host, port
+
+    host = sys.argv[1]
     port = sys.argv[2]
-    server = True if sys.argv[3] == "true" else False
-    
+
+    if host == "localhost":
+        network_thread = threading.Thread(target=networking.start_server, args=(host, int(port)))
+    else:
+        network_thread = threading.Thread(target=networking.connect_server, args=(host, int(port)))
+
+    network_thread.start()
+    print("waiting for connection...")
+    while networking.conn == None:
+        pass
+    print("game starting...")
     main()
 
