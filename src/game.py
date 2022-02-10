@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 import pygame, random, blocks, copy, networking, sys, threading
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
@@ -64,19 +64,18 @@ def main():
             land_time = game_time
 
         screen.fill(BACKGROUND_COLOR)
-
         for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    running = False
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_UP:
-                        current_block.rotate(grid)
-                    if event.key == pygame.K_SPACE:
-                        current_block.x, current_block.y = block_shadow.x, block_shadow.y
-                        landed=True
-                        move_time = game_time - 500
-                        land_time = game_time - 2000
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    current_block.rotate(grid)
+                if event.key == pygame.K_SPACE:
+                    current_block.x, current_block.y = block_shadow.x, block_shadow.y
+                    landed=True
+                    move_time = game_time - 500
+                    land_time = game_time - 2000    
         
         # move current block
         if game_time >= last_move + (1/gravity)*1000 and not current_block.borders(grid)[2]:
@@ -89,7 +88,7 @@ def main():
             move_time = game_time
         if pygame.key.get_pressed()[pygame.K_RIGHT] and not current_block.borders(grid)[0]:
             current_block.x += 1
-            move_time = game_time            
+            move_time = game_time        
 
         # break lines
         y = GAME_HEIGHT
