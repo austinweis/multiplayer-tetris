@@ -19,11 +19,18 @@ def start_server(host, port):
                 while True:
                     incoming = conn.recv(1024)
                     data += incoming
-                    if 'END' == incoming.decode("utf8")[-3:]:
+                    if 'E' == incoming.decode("utf8")[-1]:
                         break
                 data = data.decode("utf8")
-                data = data[:-3]
-
+                cut = 0
+                print(data,'\n')
+                for i in range(len(data)-1, 0, -1):
+                    if data[i] == ']':
+                        break
+                    else:
+                        cut += 1 
+                data = data[:-cut]
+                        
                 data = json.loads(data)
                 peer_block = data[1]
                 for key in data[0].keys():
@@ -50,11 +57,18 @@ def connect_server(host, port):
             while True:
                 incoming = conn.recv(1024)
                 data += incoming
-                if 'END' == incoming.decode("utf8")[-3:]:
+                if 'E' == incoming.decode("utf8")[-1]:
                     break
             data = data.decode("utf8")
-            data = data[:-3]
-
+            cut = 0
+            print(data,'\n')
+            for i in range(len(data)-1, 0, -1):
+                if data[i] == ']':
+                    break
+                else:
+                    cut += 1 
+            data = data[:-cut]
+                    
             data = json.loads(data)
             peer_block = data[1]
             for key in data[0].keys():
@@ -79,4 +93,4 @@ def send_data(tuple):
     formatted_data = json.dumps(data).encode("utf8")
 
     conn.sendall(formatted_data)
-    conn.send('END'.encode("utf8"))
+    conn.send('E'.encode("utf8"))
