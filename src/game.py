@@ -158,8 +158,8 @@ if __name__ == "__main__":
     host = sys.argv[1]
     port = sys.argv[2]
 
-    if host == "localhost":
-        network_thread = threading.Thread(target=networking.start_server, args=('127.0.0.1', int(port)))
+    if host == "localhost" or host == "127.0.0.1":
+        network_thread = threading.Thread(target=networking.start_server, args=('', int(port)))
     else:
         network_thread = threading.Thread(target=networking.connect_server, args=(host, int(port)))
 
