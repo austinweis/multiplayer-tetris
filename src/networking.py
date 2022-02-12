@@ -50,6 +50,7 @@ def connect_server(host, port):
     global peer_grid
     global peer_block
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        print(port)
         s.connect((host, port))
         conn = s
         while True:
