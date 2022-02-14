@@ -19,11 +19,12 @@ def start_server(host, port):
                 while True:
                     incoming = conn.recv(1024)
                     data += incoming
-                    if 'E' == incoming.decode("utf8")[-1]:
+                    print(incoming,'\n')
+                    if 'E' in incoming.decode("utf8"):
                         break
                 data = data.decode("utf8")
                 cut = 0
-                print(data,'\n')
+
                 for i in range(len(data)-1, 0, -1):
                     if data[i] == ']':
                         break
@@ -58,11 +59,12 @@ def connect_server(host, port):
             while True:
                 incoming = conn.recv(1024)
                 data += incoming
-                if 'E' == incoming.decode("utf8")[-1]:
+                print(incoming,'\n')
+                if 'E' in incoming.decode("utf8"):
                     break
             data = data.decode("utf8")
             cut = 0
-            print(data,'\n')
+
             for i in range(len(data)-1, 0, -1):
                 if data[i] == ']':
                     break
