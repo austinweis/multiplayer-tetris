@@ -14,26 +14,19 @@ def start_server(host, port):
         s.listen()
         conn, addr = s.accept()
         with conn:
+            incoming = ['', '']
             while True:
-                data = b''
+                data = incoming[1]
                 while True:
-                    incoming = conn.recv(1024)
-                    data += incoming
-                    print(incoming,'\n')
-                    if 'E' in incoming.decode("utf8"):
-                        break
-                data = data.decode("utf8")
-                cut = 0
+                    incoming = conn.recv(1024).decode("utf8").split("E")
+                    data += incoming[0]
 
-                for i in range(len(data)-1, 0, -1):
-                    if data[i] == ']':
+                    if len(incoming) > 1:
                         break
-                    else:
-                        cut += 1 
-                data = data[:-cut]
                         
                 data = json.loads(data)
                 peer_block = data[1]
+                #print(peer_block)
                 for key in data[0].keys():
                     new_key = key.split()
                     new_key = (int(new_key[0]), int(new_key[1]))
@@ -54,35 +47,29 @@ def connect_server(host, port):
         print(port)
         s.connect((host, port))
         conn = s
-        while True:
-            data = b''
+        with conn:
+            incoming = ['', '']
             while True:
-                incoming = conn.recv(1024)
-                data += incoming
-                print(incoming,'\n')
-                if 'E' in incoming.decode("utf8"):
-                    break
-            data = data.decode("utf8")
-            cut = 0
+                data = incoming[1]
+                while True:
+                    incoming = conn.recv(1024).decode("utf8").split("E")
+                    data += incoming[0]
 
-            for i in range(len(data)-1, 0, -1):
-                if data[i] == ']':
-                    break
-                else:
-                    cut += 1 
-            data = data[:-cut]
+                    if len(incoming) > 1:
+                        break
+
+                data = json.loads(data)
+                peer_block = data[1]
+                #print(peer_block)
+                for key in data[0].keys():
+                    new_key = key.split()
+                    new_key = (int(new_key[0]), int(new_key[1]))
                     
-            data = json.loads(data)
-            peer_block = data[1]
-            for key in data[0].keys():
-                new_key = key.split()
-                new_key = (int(new_key[0]), int(new_key[1]))
-                
-                new_val = data[0][key]
-                new_val = new_val.split()
-                new_val = (int(new_val[0]), int(new_val[1]), int(new_val[2]))
+                    new_val = data[0][key]
+                    new_val = new_val.split()
+                    new_val = (int(new_val[0]), int(new_val[1]), int(new_val[2]))
 
-                peer_grid[new_key] = new_val
+                    peer_grid[new_key] = new_val
 
 def send_data(tuple):
     dictionary = tuple[0]
