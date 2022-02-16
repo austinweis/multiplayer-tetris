@@ -6,6 +6,7 @@ GAME_WIDTH, GAME_HEIGHT     = 10, 20
 
 BACKGROUND_COLOR = (20, 20, 20)
 CELL_SIZE = 30
+running = False
 
 def main():
     pygame.init()
@@ -121,7 +122,7 @@ def main():
         score_text.draw(screen, 200, 20)
 
         peer_score_text.update(text=str(peer_score))
-        peer_score_text.draw(screen, 1000, 20)
+        peer_score_text.draw(screen, 1080, 20)
 
         # draw board
         for cell in grid.keys():
