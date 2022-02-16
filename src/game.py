@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import pygame, random, blocks, copy, networking, sys, threading
+import pygame, random, blocks, copy, networking, sys, threading, ui
 
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 GAME_WIDTH, GAME_HEIGHT     = 10, 20
@@ -10,7 +10,6 @@ CELL_SIZE = 30
 def main():
     pygame.init()
     pygame.font.init()
-    FONT = pygame.font.Font("../assets/font.ttf", 20)
 
     grid = {}
     # create grid
@@ -25,7 +24,8 @@ def main():
     grid_x, grid_y = 50, 50
     peer_grid_x, peer_grid_y = 930, 50
     score, peer_score = 0, 0
-    text = FONT.render(score.encode('utf8'), False, (255, 255, 255))
+    score_text = ui.Title("white", score)
+    peer_score_text = ui.Title("white", peer_score)
 
     def lose():
         running = False
@@ -46,7 +46,7 @@ def main():
     landed = False
     # game loop
     while running:
-        networking.send_data((grid, (current_block.color, current_block.shapes, current_block.x, current_block.y, current_block.rotation)))
+        networking.send_data((grid, (current_block.color, current_block.shapes, current_block.x, current_block.y, current_block.rotation), score))
         # check if landed 
         if current_block.borders(grid)[2] and landed == False:
             land_time = game_time
@@ -117,7 +117,11 @@ def main():
         peer_score = networking.peer_score
         block_shadow = shadow()
 
-        screen.blit(text, 0, 0)
+        score_text.update(text=str(score))
+        score_text.draw(screen, 200, 20)
+
+        peer_score_text.update(text=str(peer_score))
+        peer_score_text.draw(screen, 1000, 20)
 
         # draw board
         for cell in grid.keys():

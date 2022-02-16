@@ -7,9 +7,8 @@ peer_score = 0
 
 # start socket server, listen for data
 def start_server(host, port):
-    global conn
-    global peer_grid
-    global peer_block
+    global conn, peer_grid, peer_block, peer_score
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind((host, port))
         s.listen()
@@ -27,6 +26,7 @@ def start_server(host, port):
                         
                 data = json.loads(data)
                 peer_block = data[1]
+                peer_score = data[2]
                 #print(peer_block)
                 for key in data[0].keys():
                     new_key = key.split()
@@ -41,9 +41,8 @@ def start_server(host, port):
 
 # connect to server, listen for data
 def connect_server(host, port):
-    global conn
-    global peer_grid
-    global peer_block
+    global conn, peer_grid, peer_block, peer_score
+
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         print(port)
         s.connect((host, port))
@@ -61,6 +60,7 @@ def connect_server(host, port):
 
                 data = json.loads(data)
                 peer_block = data[1]
+                peer_score = data[2]
                 #print(peer_block)
                 for key in data[0].keys():
                     new_key = key.split()
@@ -79,8 +79,9 @@ def send_data(tuple):
         formatted_dict[' '.join(map(str, key))] = ' '.join(map(str, dictionary[key]))
 
     block = tuple[1]
+    score = tuple[2]
 
-    data = (formatted_dict, block)
+    data = (formatted_dict, block, score)
     formatted_data = json.dumps(data).encode("utf8")
 
     conn.sendall(formatted_data)
