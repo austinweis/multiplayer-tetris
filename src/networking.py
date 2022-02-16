@@ -3,6 +3,7 @@ import socket, json
 conn =       None
 peer_grid =  {}
 peer_block = []
+peer_score = 0
 
 # start socket server, listen for data
 def start_server(host, port):

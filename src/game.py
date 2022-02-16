@@ -9,6 +9,8 @@ CELL_SIZE = 30
 
 def main():
     pygame.init()
+    pygame.font.init()
+    FONT = pygame.font.Font("../assets/font.ttf", 20)
 
     grid = {}
     # create grid
@@ -22,6 +24,8 @@ def main():
     gravity = 1 # spaces moved every second
     grid_x, grid_y = 50, 50
     peer_grid_x, peer_grid_y = 930, 50
+    score, peer_score = 0, 0
+    text = FONT.render(score.encode('utf8'), False, (255, 255, 255))
 
     def lose():
         running = False
@@ -106,10 +110,15 @@ def main():
                         grid[(l, i+1)]=grid[(l,i)]
                 gravity+=0.1
                 y+=1
+                score += 1
 
         peer_grid = networking.peer_grid
         peer_block = networking.peer_block
+        peer_score = networking.peer_score
         block_shadow = shadow()
+
+        screen.blit(text, 0, 0)
+
         # draw board
         for cell in grid.keys():
             # draw blocks
