@@ -81,7 +81,6 @@ def main():
                     landed = False 
             elif landed == False:
                 land_time = game_time
-            
             # move current block
             if game_time >= last_move + (1/gravity)*1000 and not current_block.borders(grid)[2]:
                 current_block.y += 1
@@ -115,29 +114,29 @@ def main():
 
             block_shadow = shadow()
 
-            score_text.update(text=str(score))
-            score_text.draw(screen, 200, 20)
+        score_text.update(text=str(score))
+        score_text.draw(screen, 200, 20)
 
-            # draw board
-            for cell in grid.keys():
-                # draw blocks
-                pygame.draw.rect(screen, grid[cell], 
-                    pygame.Rect(grid_x + (cell[0] * CELL_SIZE), grid_y + (cell[1] * CELL_SIZE), 
-                        CELL_SIZE, CELL_SIZE))
-                # draw grid
-                pygame.draw.rect(screen, (80, 80, 80), 
-                    pygame.Rect(grid_x + (cell[0] * CELL_SIZE), grid_y + (cell[1] * CELL_SIZE), 
-                        CELL_SIZE, CELL_SIZE), width=2)
-            #draw block shadow
-            for cell in block_shadow.shapes[block_shadow.rotation]:
-                pygame.draw.rect(screen, (80, 80, 80), pygame.Rect(grid_x + (cell[0] + block_shadow.x) * CELL_SIZE, grid_y + (cell[1] + block_shadow.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-            # draw current block
-            for cell in current_block.shapes[current_block.rotation]:
-                if cell[1] + current_block.y >= 0:
-                    pygame.draw.rect(screen, current_block.color, pygame.Rect(grid_x + (cell[0] + current_block.x) * CELL_SIZE, grid_y + (cell[1] + current_block.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-            # draw next block
-            for cell in next_block.shapes[next_block.rotation]:
-                pygame.draw.rect(screen, next_block.color, pygame.Rect(640 + cell[0] * CELL_SIZE, 200 + cell[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+        # draw board
+        for cell in grid.keys():
+            # draw blocks
+            pygame.draw.rect(screen, grid[cell], 
+                pygame.Rect(grid_x + (cell[0] * CELL_SIZE), grid_y + (cell[1] * CELL_SIZE), 
+                    CELL_SIZE, CELL_SIZE))
+            # draw grid
+            pygame.draw.rect(screen, (80, 80, 80), 
+                pygame.Rect(grid_x + (cell[0] * CELL_SIZE), grid_y + (cell[1] * CELL_SIZE), 
+                    CELL_SIZE, CELL_SIZE), width=2)
+        #draw block shadow
+        for cell in block_shadow.shapes[block_shadow.rotation]:
+            pygame.draw.rect(screen, (80, 80, 80), pygame.Rect(grid_x + (cell[0] + block_shadow.x) * CELL_SIZE, grid_y + (cell[1] + block_shadow.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+        # draw current block
+        for cell in current_block.shapes[current_block.rotation]:
+            if cell[1] + current_block.y >= 0:
+                pygame.draw.rect(screen, current_block.color, pygame.Rect(grid_x + (cell[0] + current_block.x) * CELL_SIZE, grid_y + (cell[1] + current_block.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+        # draw next block
+        for cell in next_block.shapes[next_block.rotation]:
+            pygame.draw.rect(screen, next_block.color, pygame.Rect(640 + cell[0] * CELL_SIZE, 200 + cell[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
         peer_grid = networking.peer_grid
         peer_block = networking.peer_block
