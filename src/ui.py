@@ -1,8 +1,8 @@
-import pygame
+import pygame, os
 
 pygame.font.init()
 font_size = 60
-font = pygame.font.Font('../assets/font.ttf', font_size)
+font = pygame.font.Font(os.path.dirname(__file__)+'/../assets/font.ttf', font_size)
 
 class Button:
     def __init__(self, dimensions, color, text=''):
@@ -24,7 +24,7 @@ class Title:
     def draw(self, target_surface, x=0, y=0):
         text_surface = font.render(self.text, False, self.color)
 
-        target_surface.blit(text_surface, (x - text_surface.get_width()/2, y - text_surface.get_height()/2))    
+        target_surface.blit(text_surface, (x - text_surface.get_width()/2, y - text_surface.get_height()/2))
     def update(self, color=None, text=None):
         self.color = self.color if color==None else color
         self.text  = self.text if text==None else text

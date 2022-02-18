@@ -1,7 +1,4 @@
 #!/usr/bin/python3
-from operator import truediv
-import pygame, random, blocks, copy, networking, sys, threading, ui
-
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 GAME_WIDTH, GAME_HEIGHT     = 10, 20
 
@@ -160,12 +157,12 @@ def main():
                 if cell[1] + peer_block[3] >= 0:
                     pygame.draw.rect(screen, peer_block[0], pygame.Rect(peer_grid_x + (cell[0] + peer_block[2]) * CELL_SIZE, peer_grid_y + (cell[1] + peer_block[3]) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
         
-
         pygame.display.update()
         clock.tick(15)
         game_time += clock.get_time()
 
 if __name__ == "__main__":
+    import pygame, random, blocks, copy, networking, sys, threading, ui
     global host, port
 
     host = sys.argv[1]
