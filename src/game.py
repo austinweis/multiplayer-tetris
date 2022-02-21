@@ -153,7 +153,6 @@ def main(host, port):
         peer_score_text.update(text=str(peer_score))
 
         gui.draw(screen)
-        print(gui.labels)
 
         # draw peer board
         for cell in peer_grid.keys():
