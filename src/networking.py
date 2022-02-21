@@ -1,18 +1,20 @@
-import socket, json
+import socket, json, time
 
 conn =       None
 peer_grid =  {}
 peer_block = []
 peer_score = 0
+connection_established = False
 
 # start socket server, listen for data
 def start_server(host, port):
-    global conn, peer_grid, peer_block, peer_score
+    global conn, peer_grid, peer_block, peer_score, game_started, connection_established
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((host, port))
+        s.bind(('', port))
         s.listen()
         conn, addr = s.accept()
+        connection_established = True
         with conn:
             incoming = ['', '']
             while True:
@@ -22,8 +24,7 @@ def start_server(host, port):
                     data += incoming[0]
 
                     if len(incoming) > 1:
-                        break
-                        
+                        break  
                 data = json.loads(data)
                 peer_block = data[1]
                 peer_score = data[2]
@@ -40,11 +41,16 @@ def start_server(host, port):
 
 # connect to server, listen for data
 def connect_server(host, port):
-    global conn, peer_grid, peer_block, peer_score
+    global conn, peer_grid, peer_block, peer_score, game_started, connection_established
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.connect((host, port))
-        conn = s
+        while connection_established == False:
+            try:
+                s.connect((host, port))
+                conn = s
+                connection_established = True
+            except:
+                print("connection not made")
         with conn:
             incoming = ['', '']
             while True:
@@ -55,7 +61,7 @@ def connect_server(host, port):
 
                     if len(incoming) > 1:
                         break
-
+                
                 data = json.loads(data)
                 peer_block = data[1]
                 peer_score = data[2]
@@ -69,13 +75,37 @@ def connect_server(host, port):
 
                     peer_grid[new_key] = new_val
 
-def test_connection(address, port):
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        try:
-            s.connect((address, port))
-            return True
-        except:
-            return False
+def get_network_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+    s.connect(('<broadcast>', 0))
+    ip = s.getsockname()[-2]
+    s.close()
+    return ip
+def init_connection(address, port, hosting):
+    if hosting:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind((address, int(port)-1))
+            s.listen()
+            conn, addr = s.accept()
+            with conn:
+                conn.send('ready'.encode("utf8"))     
+                conn.close()
+                s.close()
+        print("complete")
+        return True
+    else:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.connect((address, int(port)-1))
+                data = s.recv(1024).decode("utf8")
+                print(data)
+                if not data == 'ready':
+                    raise Exception("Data not returned properly")
+                s.close()
+                return True
+            except:
+                return False
 
 def send_data(tuple):
     dictionary = tuple[0]

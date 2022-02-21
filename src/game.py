@@ -12,13 +12,13 @@ def main(host, port):
     pygame.font.init()
 
     if host == "localhost":
-        network_thread = threading.Thread(target=networking.start_server, args=('', int(port)))
+        network_thread = threading.Thread(target=networking.init_connection, args=('', int(port), True))
     else:
         network_thread = threading.Thread(target=networking.connect_server, args=(host, int(port)))
 
     network_thread.start()
     print("waiting for connection...")
-    while networking.conn == None:
+    while networking.connection_established == False:
         pass
     print("game starting...")
 
@@ -69,6 +69,7 @@ def main(host, port):
                     land_time = game_time - 2000    
         screen.fill(BACKGROUND_COLOR)
         if gameover == False:
+            print(networking.conn)
             networking.send_data((grid, (current_block.color, current_block.shapes, current_block.x, current_block.y, current_block.rotation), score))
             # check if landed 
             if current_block.borders(grid)[2] and landed == False:
