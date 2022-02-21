@@ -92,14 +92,12 @@ def init_connection(address, port, hosting):
                 conn.send('ready'.encode("utf8"))     
                 conn.close()
                 s.close()
-        print("complete")
         return True
     else:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
                 s.connect((address, int(port)-1))
                 data = s.recv(1024).decode("utf8")
-                print(data)
                 if not data == 'ready':
                     raise Exception("Data not returned properly")
                 s.close()

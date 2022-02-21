@@ -12,7 +12,7 @@ def main(host, port):
     pygame.font.init()
 
     if host == "localhost":
-        network_thread = threading.Thread(target=networking.init_connection, args=('', int(port), True))
+        network_thread = threading.Thread(target=networking.start_server, args=('', int(port)))
     else:
         network_thread = threading.Thread(target=networking.connect_server, args=(host, int(port)))
 
@@ -35,8 +35,8 @@ def main(host, port):
     grid_x, grid_y = 50, 50
     peer_grid_x, peer_grid_y = 930, 50
     score, peer_score = 0, 0
-    score_text = gui.Label("white", score)
-    peer_score_text = gui.Label("white", peer_score)
+    score_text = gui.Label((200, 20),"white", str(score))
+    peer_score_text = gui.Label((1080, 20),"white", str(peer_score))
     gameover = False
 
     def shadow():
@@ -69,7 +69,6 @@ def main(host, port):
                     land_time = game_time - 2000    
         screen.fill(BACKGROUND_COLOR)
         if gameover == False:
-            print(networking.conn)
             networking.send_data((grid, (current_block.color, current_block.shapes, current_block.x, current_block.y, current_block.rotation), score))
             # check if landed 
             if current_block.borders(grid)[2] and landed == False:
@@ -152,6 +151,9 @@ def main(host, port):
         peer_block = networking.peer_block
         peer_score = networking.peer_score
         peer_score_text.update(text=str(peer_score))
+
+        gui.draw(screen)
+        print(gui.labels)
 
         # draw peer board
         for cell in peer_grid.keys():
