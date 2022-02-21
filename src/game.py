@@ -1,13 +1,26 @@
 #!/usr/bin/python3
+import sys
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 GAME_WIDTH, GAME_HEIGHT     = 10, 20
 
 BACKGROUND_COLOR = (20, 20, 20)
 CELL_SIZE = 30
 
-def main():
+def main(host, port):
+    import pygame, random, blocks, copy, networking, threading, gui
     pygame.init()
     pygame.font.init()
+
+    if host == "localhost":
+        network_thread = threading.Thread(target=networking.start_server, args=('', int(port)))
+    else:
+        network_thread = threading.Thread(target=networking.connect_server, args=(host, int(port)))
+
+    network_thread.start()
+    print("waiting for connection...")
+    while networking.conn == None:
+        pass
+    print("game starting...")
 
     grid = {}
     # create grid
@@ -22,8 +35,8 @@ def main():
     grid_x, grid_y = 50, 50
     peer_grid_x, peer_grid_y = 930, 50
     score, peer_score = 0, 0
-    score_text = ui.Title("white", score)
-    peer_score_text = ui.Title("white", peer_score)
+    score_text = gui.Label("white", score)
+    peer_score_text = gui.Label("white", peer_score)
     gameover = False
 
     def shadow():
@@ -112,7 +125,6 @@ def main():
             block_shadow = shadow()
 
         score_text.update(text=str(score))
-        score_text.draw(screen, 200, 20)
 
         # draw board
         for cell in grid.keys():
@@ -139,7 +151,6 @@ def main():
         peer_block = networking.peer_block
         peer_score = networking.peer_score
         peer_score_text.update(text=str(peer_score))
-        peer_score_text.draw(screen, 1080, 20)
 
         # draw peer board
         for cell in peer_grid.keys():
@@ -162,21 +173,8 @@ def main():
         game_time += clock.get_time()
 
 if __name__ == "__main__":
-    import pygame, random, blocks, copy, networking, sys, threading, ui
-    global host, port
-
     host = sys.argv[1]
     port = sys.argv[2]
 
-    if host == "localhost":
-        network_thread = threading.Thread(target=networking.start_server, args=('', int(port)))
-    else:
-        network_thread = threading.Thread(target=networking.connect_server, args=(host, int(port)))
-
-    network_thread.start()
-    print("waiting for connection...")
-    while networking.conn == None:
-        pass
-    print("game starting...")
-    main()
+    main(host, port)
 
