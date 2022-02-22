@@ -1,4 +1,6 @@
-import pygame, gui, game, networking
+#!/usr/bin/python3
+import pygame, sys
+from src import game,gui,networking
 from collections import namedtuple
 pygame.init()
 
