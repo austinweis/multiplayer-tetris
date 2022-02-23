@@ -1,5 +1,4 @@
-import pygame
-import game
+from src import game
 
 class Block():
     def __init__(self, shapes, color):

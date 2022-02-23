@@ -1,15 +1,16 @@
-#!/usr/bin/python3
-import socket, json, time
+import socket, json 
 
 conn =       None
 peer_grid =  {}
 peer_block = []
 peer_score = 0
 connection_established = False
+peer_found = False
+peer_end = False
 
 # start socket server, listen for data
 def start_server(host, port):
-    global conn, peer_grid, peer_block, peer_score, game_started, connection_established
+    global conn, peer_grid, peer_block, peer_score, game_started, connection_established, peer_end
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('', port))
@@ -18,31 +19,37 @@ def start_server(host, port):
         connection_established = True
         with conn:
             incoming = ['', '']
-            while True:
+            while peer_end == False:
                 data = incoming[1]
                 while True:
-                    incoming = conn.recv(1024).decode("utf8").split("E")
+                    incoming = conn.recv(1024).decode("utf8")
+
+                    if incoming[0] == 'D' or incoming[-1] == 'D':
+                        peer_end = True
+                    incoming = incoming.split("E")
                     data += incoming[0]
 
                     if len(incoming) > 1:
-                        break  
-                data = json.loads(data)
-                peer_block = data[1]
-                peer_score = data[2]
-                for key in data[0].keys():
-                    new_key = key.split()
-                    new_key = (int(new_key[0]), int(new_key[1]))
-                    
-                    new_val = data[0][key]
-                    new_val = new_val.split()
-                    new_val = (int(new_val[0]), int(new_val[1]), int(new_val[2]))
+                        break
+                if peer_end == False:
+                    data = json.loads(data)
+                    peer_block = data[1]
+                    peer_score = data[2]
+                    for key in data[0].keys():
+                        new_key = key.split()
+                        new_key = (int(new_key[0]), int(new_key[1]))
+                        
+                        new_val = data[0][key]
+                        new_val = new_val.split()
+                        new_val = (int(new_val[0]), int(new_val[1]), int(new_val[2]))
 
-                    peer_grid[new_key] = new_val
+                        peer_grid[new_key] = new_val
+
 
 
 # connect to server, listen for data
 def connect_server(host, port):
-    global conn, peer_grid, peer_block, peer_score, game_started, connection_established
+    global conn, peer_grid, peer_block, peer_score, game_started, connection_established, peer_end
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         while connection_established == False:
@@ -53,28 +60,32 @@ def connect_server(host, port):
             except:
                 print("connection not made")
         with conn:
-            incoming = ['', '']
-            while True:
+            incoming = ['','']
+            while peer_end == False:
                 data = incoming[1]
                 while True:
-                    incoming = conn.recv(1024).decode("utf8").split("E")
+                    incoming = conn.recv(1024).decode("utf8")
+
+                    if incoming[0] == 'D' or incoming[-1] == 'D':
+                        peer_end = True
+                    incoming = incoming.split("E")
                     data += incoming[0]
 
                     if len(incoming) > 1:
                         break
-                
-                data = json.loads(data)
-                peer_block = data[1]
-                peer_score = data[2]
-                for key in data[0].keys():
-                    new_key = key.split()
-                    new_key = (int(new_key[0]), int(new_key[1]))
-                    
-                    new_val = data[0][key]
-                    new_val = new_val.split()
-                    new_val = (int(new_val[0]), int(new_val[1]), int(new_val[2]))
+                if peer_end == False:
+                    data = json.loads(data)
+                    peer_block = data[1]
+                    peer_score = data[2]
+                    for key in data[0].keys():
+                        new_key = key.split()
+                        new_key = (int(new_key[0]), int(new_key[1]))
+                        
+                        new_val = data[0][key]
+                        new_val = new_val.split()
+                        new_val = (int(new_val[0]), int(new_val[1]), int(new_val[2]))
 
-                    peer_grid[new_key] = new_val
+                        peer_grid[new_key] = new_val
 
 def get_network_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -84,6 +95,7 @@ def get_network_ip():
     s.close()
     return ip
 def init_connection(address, port, hosting):
+    global peer_found
     if hosting:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((address, int(port)-1))
@@ -93,6 +105,7 @@ def init_connection(address, port, hosting):
                 conn.send('ready'.encode("utf8"))     
                 conn.close()
                 s.close()
+        peer_found = True
         return True
     else:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -102,6 +115,7 @@ def init_connection(address, port, hosting):
                 if not data == 'ready':
                     raise Exception("Data not returned properly")
                 s.close()
+                peer_found = True
                 return True
             except:
                 return False

@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 import pygame, os
 
 pygame.font.init()
@@ -20,6 +19,7 @@ def draw(target_surface):
     for input in inputs:
         target_surface.blit(input.text_surface, (input.rect.centerx - input.text_surface.get_width()/2, input.rect.centery - input.text_surface.get_height()/2))
         pygame.draw.rect(target_surface, input.color, input.rect, 2)
+        pygame.draw.rect(target_surface, input.color, input.line)
 def call(event):
     for button in buttons:
         if event.type == pygame.MOUSEBUTTONUP:
@@ -28,16 +28,19 @@ def call(event):
     for input in inputs:
         if event.type == pygame.MOUSEBUTTONUP:
             if input.rect.collidepoint(event.pos):
-                input.active = not input.active
+                input.active = True
+                input.line.width = 8
             else:
+                input.line.width = 0
                 input.active = False
         if event.type == pygame.KEYDOWN:
             if input.active:
                 if event.key == pygame.K_BACKSPACE:
                     input.text = input.text[:-1]
-                elif input.rect.width-10 > input.text_surface.get_width():
-                    input.text += event.unicode
+                elif input.rect.width-50 > input.text_surface.get_width():
+                    input.text += event.unicode    
                 input.text_surface = font.render(input.text, True, input.color)
+                input.line.x = input.rect.centerx + input.text_surface.get_width()/2
     return None
 
     return None
@@ -86,6 +89,7 @@ class InputBox:
         self.text = text
         self.text_surface = font.render(text, False, self.color)
         self.active = False
+        self.line = pygame.Rect(self.rect.centerx, self.rect.centery - self.rect.height/3, 0, self.rect.height/1.5)
 
         inputs.append(self)
     def update(self, dimensions=None, position=None, color=None, text=None):

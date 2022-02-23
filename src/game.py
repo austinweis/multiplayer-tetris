@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-import sys
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 GAME_WIDTH, GAME_HEIGHT     = 10, 20
 
@@ -7,7 +5,9 @@ BACKGROUND_COLOR = (20, 20, 20)
 CELL_SIZE = 30
 
 def main(host, port):
-    import pygame, random, blocks, copy, networking, threading, gui
+    import pygame, random, copy, threading
+    from src import gui, networking, blocks
+    import launcher
     pygame.init()
     pygame.font.init()
 
@@ -37,6 +37,8 @@ def main(host, port):
     score, peer_score = 0, 0
     score_text = gui.Label((200, 20),"white", str(score))
     peer_score_text = gui.Label((1080, 20),"white", str(peer_score))
+    menu = gui.Button(color="green", dimensions=(200, 100), position=(640, 360), text="Menu")
+    menu.toggle()
     gameover = False
 
     def shadow():
@@ -54,6 +56,7 @@ def main(host, port):
     running = True
     landed = False
     # game loop
+    screen.fill(BACKGROUND_COLOR)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -67,8 +70,9 @@ def main(host, port):
                     landed=True
                     move_time = game_time - 500
                     land_time = game_time - 2000    
-        screen.fill(BACKGROUND_COLOR)
+        pygame.draw.rect(screen, BACKGROUND_COLOR, pygame.Rect(400, 0, 400, 720))
         if gameover == False:
+            pygame.draw.rect(screen, BACKGROUND_COLOR, pygame.Rect(0, 0, 400, 720))
             networking.send_data((grid, (current_block.color, current_block.shapes, current_block.x, current_block.y, current_block.rotation), score))
             # check if landed 
             if current_block.borders(grid)[2] and landed == False:
@@ -85,7 +89,7 @@ def main(host, port):
                         if cell[1] + current_block.y >= 0:
                             if grid[cell[0] + current_block.x, cell[1] + current_block.y] != BACKGROUND_COLOR:
                                 gameover = True
-                                print(f"your score is: {score}")
+                                networking.conn.send("D".encode("utf8"))
                                 break
                     next_block = copy.copy(random.choice(blocks.shapes))
                     landed = False 
@@ -123,60 +127,57 @@ def main(host, port):
                     score += 1
 
             block_shadow = shadow()
+            score_text.update(text=str(score))
 
-        score_text.update(text=str(score))
-
-        # draw board
-        for cell in grid.keys():
-            # draw blocks
-            pygame.draw.rect(screen, grid[cell], 
-                pygame.Rect(grid_x + (cell[0] * CELL_SIZE), grid_y + (cell[1] * CELL_SIZE), 
-                    CELL_SIZE, CELL_SIZE))
-            # draw grid
-            pygame.draw.rect(screen, (80, 80, 80), 
-                pygame.Rect(grid_x + (cell[0] * CELL_SIZE), grid_y + (cell[1] * CELL_SIZE), 
-                    CELL_SIZE, CELL_SIZE), width=2)
-        #draw block shadow
-        for cell in block_shadow.shapes[block_shadow.rotation]:
-            pygame.draw.rect(screen, (80, 80, 80), pygame.Rect(grid_x + (cell[0] + block_shadow.x) * CELL_SIZE, grid_y + (cell[1] + block_shadow.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-        # draw current block
-        for cell in current_block.shapes[current_block.rotation]:
-            if cell[1] + current_block.y >= 0:
-                pygame.draw.rect(screen, current_block.color, pygame.Rect(grid_x + (cell[0] + current_block.x) * CELL_SIZE, grid_y + (cell[1] + current_block.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-        # draw next block
-        for cell in next_block.shapes[next_block.rotation]:
-            pygame.draw.rect(screen, next_block.color, pygame.Rect(640 + cell[0] * CELL_SIZE, 200 + cell[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-
-        peer_grid = networking.peer_grid
-        peer_block = networking.peer_block
-        peer_score = networking.peer_score
-        peer_score_text.update(text=str(peer_score))
-
-        gui.draw(screen)
-
-        # draw peer board
-        for cell in peer_grid.keys():
-            # draw blocks
-            pygame.draw.rect(screen, peer_grid[cell], 
-                pygame.Rect(peer_grid_x + (cell[0] * CELL_SIZE), peer_grid_y + (cell[1] * CELL_SIZE), 
-                    CELL_SIZE, CELL_SIZE))
-            # draw grid
-            pygame.draw.rect(screen, (80, 80, 80), 
-                pygame.Rect(peer_grid_x + (cell[0] * CELL_SIZE), peer_grid_y + (cell[1] * CELL_SIZE), 
-                    CELL_SIZE, CELL_SIZE), width=2)
+            # draw board
+            for cell in grid.keys():
+                # draw blocks
+                pygame.draw.rect(screen, grid[cell], 
+                    pygame.Rect(grid_x + (cell[0] * CELL_SIZE), grid_y + (cell[1] * CELL_SIZE), 
+                        CELL_SIZE, CELL_SIZE))
+                # draw grid
+                pygame.draw.rect(screen, (80, 80, 80), 
+                    pygame.Rect(grid_x + (cell[0] * CELL_SIZE), grid_y + (cell[1] * CELL_SIZE), 
+                        CELL_SIZE, CELL_SIZE), width=2)
+            #draw block shadow
+            for cell in block_shadow.shapes[block_shadow.rotation]:
+                pygame.draw.rect(screen, (80, 80, 80), pygame.Rect(grid_x + (cell[0] + block_shadow.x) * CELL_SIZE, grid_y + (cell[1] + block_shadow.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
             # draw current block
-            #current_block.color, current_block.shapes, current_block.x, current_block.y, current_block.rotation
-            for cell in peer_block[1][peer_block[4]]:
-                if cell[1] + peer_block[3] >= 0:
-                    pygame.draw.rect(screen, peer_block[0], pygame.Rect(peer_grid_x + (cell[0] + peer_block[2]) * CELL_SIZE, peer_grid_y + (cell[1] + peer_block[3]) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-        
+            for cell in current_block.shapes[current_block.rotation]:
+                if cell[1] + current_block.y >= 0:
+                    pygame.draw.rect(screen, current_block.color, pygame.Rect(grid_x + (cell[0] + current_block.x) * CELL_SIZE, grid_y + (cell[1] + current_block.y) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+            # draw next block
+            for cell in next_block.shapes[next_block.rotation]:
+                pygame.draw.rect(screen, next_block.color, pygame.Rect(640 + cell[0] * CELL_SIZE, 200 + cell[1] * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+        if networking.peer_end == False:
+            pygame.draw.rect(screen, BACKGROUND_COLOR, pygame.Rect(930, 0, 400, 720))
+            peer_grid = networking.peer_grid
+            peer_block = networking.peer_block
+            peer_score = networking.peer_score
+            peer_score_text.update(text=str(peer_score))
+
+            # draw peer board
+            for cell in peer_grid.keys():
+                # draw blocks
+                pygame.draw.rect(screen, peer_grid[cell], 
+                    pygame.Rect(peer_grid_x + (cell[0] * CELL_SIZE), peer_grid_y + (cell[1] * CELL_SIZE), 
+                        CELL_SIZE, CELL_SIZE))
+                # draw grid
+                pygame.draw.rect(screen, (80, 80, 80), 
+                    pygame.Rect(peer_grid_x + (cell[0] * CELL_SIZE), peer_grid_y + (cell[1] * CELL_SIZE), 
+                        CELL_SIZE, CELL_SIZE), width=2)
+                # draw current block
+                #current_block.color, current_block.shapes, current_block.x, current_block.y, current_block.rotation
+                for cell in peer_block[1][peer_block[4]]:
+                    if cell[1] + peer_block[3] >= 0:
+                        pygame.draw.rect(screen, peer_block[0], pygame.Rect(peer_grid_x + (cell[0] + peer_block[2]) * CELL_SIZE, peer_grid_y + (cell[1] + peer_block[3]) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
+        if networking.peer_end and gameover and network_thread.is_alive():   
+            networking.conn.close()
+            networking.conn = None
+            network_thread.join()
+            print("test")
+            menu.toggle()
+        gui.draw(screen)
         pygame.display.update()
         clock.tick(15)
         game_time += clock.get_time()
-
-if __name__ == "__main__":
-    host = sys.argv[1]
-    port = sys.argv[2]
-
-    main(host, port)
-
