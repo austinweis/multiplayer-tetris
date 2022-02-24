@@ -1,8 +1,5 @@
 #!/usr/bin/python3
-import pygame, sys, threading
-from src import game,gui,networking
-from collections import namedtuple
-
+from src import gui
 def switch_scene(new_scene):
     global previous_scene, current_scene
     gui.hide_all(screen)
@@ -12,6 +9,10 @@ def switch_scene(new_scene):
     current_scene = new_scene
 
 def main():
+    import pygame, sys, threading
+    from src import game, networking
+    from collections import namedtuple
+
     global screen, current_scene, previous_scene
 
     pygame.init()

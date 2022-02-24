@@ -5,7 +5,7 @@ BACKGROUND_COLOR = (20, 20, 20)
 CELL_SIZE = 30
 
 def main(host, port):
-    import pygame, random, copy, threading
+    import pygame, random, copy, threading, time
     from src import gui, networking, blocks
     import launcher
     pygame.init()
@@ -38,7 +38,11 @@ def main(host, port):
     score_text = gui.Label((200, 20),"white", str(score))
     peer_score_text = gui.Label((1080, 20),"white", str(peer_score))
     menu = gui.Button(color="green", dimensions=(200, 100), position=(640, 360), text="Menu")
+    you_win = gui.Label(color="yellow", text="You Win!", position=(640, 200))
+    you_lose = gui.Label(color="red", text="You Lose!", position=(640, 200))
     menu.toggle()
+    you_win.toggle()
+    you_lose.toggle()
     gameover = False
 
     def shadow():
@@ -59,6 +63,7 @@ def main(host, port):
     screen.fill(BACKGROUND_COLOR)
     while running:
         for event in pygame.event.get():
+            gui_event = gui.call(event)
             if event.type == pygame.QUIT:
                 pygame.quit()
                 running = False
@@ -70,8 +75,21 @@ def main(host, port):
                     landed=True
                     move_time = game_time - 500
                     land_time = game_time - 2000    
+            if gui_event == menu:       
+                running = False  
+                networking.conn = None
+                networking.peer_grid =  {}
+                networking.peer_block = []
+                networking.peer_score = 0
+                networking.connection_established = False
+                networking.peer_found = False
+                networking.peer_end = False
+                networking.conn_end = False
+                networking.peer_disconnect = False
+                launcher.main()
         pygame.draw.rect(screen, BACKGROUND_COLOR, pygame.Rect(400, 0, 400, 720))
         if gameover == False:
+            gravity += 0.001
             pygame.draw.rect(screen, BACKGROUND_COLOR, pygame.Rect(0, 0, 400, 720))
             networking.send_data((grid, (current_block.color, current_block.shapes, current_block.x, current_block.y, current_block.rotation), score))
             # check if landed 
@@ -89,7 +107,8 @@ def main(host, port):
                         if cell[1] + current_block.y >= 0:
                             if grid[cell[0] + current_block.x, cell[1] + current_block.y] != BACKGROUND_COLOR:
                                 gameover = True
-                                networking.conn.send("D".encode("utf8"))
+                                if networking.peer_disconnect == False:
+                                    networking.conn.send("D".encode("utf8"))
                                 break
                     next_block = copy.copy(random.choice(blocks.shapes))
                     landed = False 
@@ -122,7 +141,6 @@ def main(host, port):
                         grid[(l, y)] = BACKGROUND_COLOR
                         for i in range(y-1, 0, -1):
                             grid[(l, i+1)]=grid[(l,i)]
-                    gravity+=0.1
                     y+=1
                     score += 1
 
@@ -171,12 +189,18 @@ def main(host, port):
                 for cell in peer_block[1][peer_block[4]]:
                     if cell[1] + peer_block[3] >= 0:
                         pygame.draw.rect(screen, peer_block[0], pygame.Rect(peer_grid_x + (cell[0] + peer_block[2]) * CELL_SIZE, peer_grid_y + (cell[1] + peer_block[3]) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-        if networking.peer_end and gameover and network_thread.is_alive():   
-            networking.conn.close()
-            networking.conn = None
+        if networking.peer_end and gameover and network_thread.is_alive():
+            networking.conn_end = True
+            time.sleep(1)
+            if networking.peer_disconnect == False:
+                if host == 'localhost':
+                    networking.conn.send((("0"*1023) + "D").encode("utf8"))
             network_thread.join()
-            print("test")
             menu.toggle()
+            if score > peer_score:
+                you_win.toggle()
+            elif score < peer_score:
+                you_lose.toggle()
         gui.draw(screen)
         pygame.display.update()
         clock.tick(15)

@@ -7,10 +7,12 @@ peer_score = 0
 connection_established = False
 peer_found = False
 peer_end = False
+conn_end = False
+peer_disconnect = False
 
 # start socket server, listen for data
 def start_server(host, port):
-    global conn, peer_grid, peer_block, peer_score, game_started, connection_established, peer_end
+    global conn, peer_grid, peer_block, peer_score, game_started, connection_established, peer_end, conn_end
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('', port))
@@ -19,16 +21,17 @@ def start_server(host, port):
         connection_established = True
         with conn:
             incoming = ['', '']
-            while peer_end == False:
-                data = incoming[1]
+            while conn_end == False:
+                data = incoming[1]         
                 while True:
-                    incoming = conn.recv(1024).decode("utf8")
-
-                    if incoming[0] == 'D' or incoming[-1] == 'D':
+                    incoming = conn.recv(1024)
+                    if not incoming:
+                        break
+                    incoming = incoming.decode("utf8")
+                    if 'D' in incoming:
                         peer_end = True
                     incoming = incoming.split("E")
                     data += incoming[0]
-
                     if len(incoming) > 1:
                         break
                 if peer_end == False:
@@ -44,12 +47,12 @@ def start_server(host, port):
                         new_val = (int(new_val[0]), int(new_val[1]), int(new_val[2]))
 
                         peer_grid[new_key] = new_val
-
-
+        conn.close()
+        s.close()
 
 # connect to server, listen for data
 def connect_server(host, port):
-    global conn, peer_grid, peer_block, peer_score, game_started, connection_established, peer_end
+    global conn, peer_grid, peer_block, peer_score, game_started, connection_established, peer_end, conn_end
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         while connection_established == False:
@@ -61,16 +64,15 @@ def connect_server(host, port):
                 print("connection not made")
         with conn:
             incoming = ['','']
-            while peer_end == False:
+            while conn_end == False:
                 data = incoming[1]
-                while True:
-                    incoming = conn.recv(1024).decode("utf8")
-
-                    if incoming[0] == 'D' or incoming[-1] == 'D':
+                while conn_end == False:
+                    incoming = conn.recv(1024)
+                    incoming = incoming.decode("utf8")
+                    if 'D' in incoming:
                         peer_end = True
                     incoming = incoming.split("E")
                     data += incoming[0]
-
                     if len(incoming) > 1:
                         break
                 if peer_end == False:
@@ -86,6 +88,9 @@ def connect_server(host, port):
                         new_val = (int(new_val[0]), int(new_val[1]), int(new_val[2]))
 
                         peer_grid[new_key] = new_val
+        conn.close()
+        s.close()
+
 
 def get_network_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -121,6 +126,7 @@ def init_connection(address, port, hosting):
                 return False
 
 def send_data(tuple):
+    global peer_disconnect
     dictionary = tuple[0]
     formatted_dict = {}
     for key in dictionary.keys():
@@ -132,5 +138,8 @@ def send_data(tuple):
     data = (formatted_dict, block, score)
     formatted_data = json.dumps(data).encode("utf8")
 
-    conn.sendall(formatted_data)
-    conn.send('E'.encode("utf8"))
+    try:
+        conn.sendall(formatted_data)
+        conn.send('E'.encode("utf8"))
+    except:
+        peer_disconnect = True
