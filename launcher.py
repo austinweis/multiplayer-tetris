@@ -16,6 +16,12 @@ def main():
     global screen, current_scene, previous_scene
 
     pygame.init()
+
+    pygame.display.set_caption('Tetris')
+    icon = pygame.image.load('assets/icon.png')
+    pygame.display.set_icon(icon)
+
+
     screen = pygame.display.set_mode((game.WINDOW_WIDTH, game.WINDOW_HEIGHT), pygame.RESIZABLE | pygame.SCALED)
     Scene = namedtuple('Scene', ['name', 'gui'])
 
@@ -84,7 +90,7 @@ def main():
                 switch_scene(client_scene)
             if event_result == server:
                 switch_scene(server_scene)
-            if event_result == connect and error == False:
+            if event_result == connect and error == False and not network_thread.is_alive():
                 connecting.toggle()
                 network_thread = threading.Thread(target=networking.init_connection, args=(server_ip.text, server_port.text, False))
                 network_thread.start()
@@ -93,7 +99,7 @@ def main():
                     connecting.toggle()
                     error = True
                     error1.toggle()
-            if event_result == start:
+            if event_result == start and not network_thread.is_alive():
                 wait_connect.toggle()
                 network_thread = threading.Thread(target=networking.init_connection, args=('', server_port.text, True))
                 network_thread.start()

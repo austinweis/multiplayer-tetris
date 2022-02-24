@@ -11,6 +11,10 @@ def main(host, port):
     pygame.init()
     pygame.font.init()
 
+    pygame.display.set_caption('Tetris')
+    icon = pygame.image.load('assets/icon.png')
+    pygame.display.set_icon(icon)
+
     if host == "localhost":
         network_thread = threading.Thread(target=networking.start_server, args=('', int(port)))
     else:
