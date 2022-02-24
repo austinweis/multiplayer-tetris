@@ -18,7 +18,7 @@ def main():
     pygame.init()
 
     pygame.display.set_caption('Tetris')
-    icon = pygame.image.load('assets/icon.png')
+    icon = pygame.image.load('./assets/icon.png')
     pygame.display.set_icon(icon)
 
 

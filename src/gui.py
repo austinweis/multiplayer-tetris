@@ -1,9 +1,9 @@
-import pygame, os
+import pygame
 
 pygame.font.init()
 pygame.init()
 font_size = 60
-font = pygame.font.Font(os.path.dirname(__file__)+'/../assets/font.ttf', font_size)
+font = pygame.font.Font('./assets/font.ttf', font_size)
 
 buttons = []
 labels  = []
