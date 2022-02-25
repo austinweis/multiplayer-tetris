@@ -1,3 +1,4 @@
+import sys
 WINDOW_WIDTH, WINDOW_HEIGHT = 1280, 720
 GAME_WIDTH, GAME_HEIGHT     = 10, 20
 
@@ -21,10 +22,10 @@ def main(host, port):
         network_thread = threading.Thread(target=networking.connect_server, args=(host, int(port)))
 
     network_thread.start()
-    print("waiting for connection...")
+
     while networking.connection_established == False:
         pass
-    print("game starting...")
+    seed = networking.game_seed
 
     grid = {}
     # create grid
@@ -48,6 +49,7 @@ def main(host, port):
     you_win.toggle()
     you_lose.toggle()
     gameover = False
+    random.seed(seed)
 
     def shadow():
         shadow = blocks.Block(current_block.shapes, (80, 80, 80))
@@ -69,8 +71,10 @@ def main(host, port):
         for event in pygame.event.get():
             gui_event = gui.call(event)
             if event.type == pygame.QUIT:
+                networking.conn_end = True
+                pygame.display.quit()
                 pygame.quit()
-                running = False
+                sys.exit()
             if event.type == pygame.KEYDOWN and gameover == False:
                 if event.key == pygame.K_UP:
                     current_block.rotate(grid)
@@ -93,7 +97,7 @@ def main(host, port):
                 launcher.main()
         pygame.draw.rect(screen, BACKGROUND_COLOR, pygame.Rect(400, 0, 400, 720))
         if gameover == False:
-            gravity += 0.001
+            gravity += 0.002
             pygame.draw.rect(screen, BACKGROUND_COLOR, pygame.Rect(0, 0, 400, 720))
             networking.send_data((grid, (current_block.color, current_block.shapes, current_block.x, current_block.y, current_block.rotation), score))
             # check if landed 
@@ -193,7 +197,7 @@ def main(host, port):
                 for cell in peer_block[1][peer_block[4]]:
                     if cell[1] + peer_block[3] >= 0:
                         pygame.draw.rect(screen, peer_block[0], pygame.Rect(peer_grid_x + (cell[0] + peer_block[2]) * CELL_SIZE, peer_grid_y + (cell[1] + peer_block[3]) * CELL_SIZE, CELL_SIZE, CELL_SIZE))
-        if networking.peer_end and gameover and network_thread.is_alive():
+        if (networking.peer_end or networking.peer_disconnect) and gameover and network_thread.is_alive():
             networking.conn_end = True
             time.sleep(1)
             if networking.peer_disconnect == False:

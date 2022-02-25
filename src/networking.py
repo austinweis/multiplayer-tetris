@@ -1,4 +1,4 @@
-import socket, json 
+import socket, json, time
 
 conn =       None
 peer_grid =  {}
@@ -9,6 +9,7 @@ peer_found = False
 peer_end = False
 conn_end = False
 peer_disconnect = False
+game_seed = 0
 
 # start socket server, listen for data
 def start_server(host, port):
@@ -68,6 +69,8 @@ def connect_server(host, port):
                 data = incoming[1]
                 while conn_end == False:
                     incoming = conn.recv(1024)
+                    if not incoming:
+                        break
                     incoming = incoming.decode("utf8")
                     if 'D' in incoming:
                         peer_end = True
@@ -100,14 +103,15 @@ def get_network_ip():
     s.close()
     return ip
 def init_connection(address, port, hosting):
-    global peer_found
+    global peer_found, game_seed
+    game_seed = int(time.time())
     if hosting:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((address, int(port)-1))
             s.listen()
             conn, addr = s.accept()
             with conn:
-                conn.send('ready'.encode("utf8"))     
+                conn.send(f'ready,{game_seed}'.encode("utf8"))     
                 conn.close()
                 s.close()
         peer_found = True
@@ -116,9 +120,10 @@ def init_connection(address, port, hosting):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
                 s.connect((address, int(port)-1))
-                data = s.recv(1024).decode("utf8")
-                if not data == 'ready':
+                data = s.recv(1024).decode("utf8").split(',')
+                if not 'ready' == data[0]:
                     raise Exception("Data not returned properly")
+                game_seed = int(data[1])
                 s.close()
                 peer_found = True
                 return True
@@ -126,7 +131,7 @@ def init_connection(address, port, hosting):
                 return False
 
 def send_data(tuple):
-    global peer_disconnect
+    global peer_end
     dictionary = tuple[0]
     formatted_dict = {}
     for key in dictionary.keys():
@@ -142,4 +147,4 @@ def send_data(tuple):
         conn.sendall(formatted_data)
         conn.send('E'.encode("utf8"))
     except:
-        peer_disconnect = True
+        peer_end = True

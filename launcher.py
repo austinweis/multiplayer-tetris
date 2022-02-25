@@ -75,15 +75,16 @@ def main():
                 network_thread.join()
                 running = False
                 game.main('localhost', server_port.text)
-                pygame.quit()
             if current_scene == client_scene:
                 gui.hide_all(screen)
+                network_thread.join()
                 running = False
                 game.main(server_ip.text, server_port.text)
-                pygame.quit()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.display.quit()
                 pygame.quit()
+                sys.exit()
                 running = False
             event_result = gui.call(event)
             if event_result == client:
