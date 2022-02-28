@@ -1,6 +1,6 @@
 import socket, json, time
 
-conn =       None
+conn = None
 peer_grid =  {}
 peer_block = []
 peer_score = 0
@@ -9,6 +9,7 @@ peer_found = False
 peer_end = False
 conn_end = False
 peer_disconnect = False
+timeout = False
 game_seed = 0
 
 # start socket server, listen for data
@@ -103,13 +104,19 @@ def get_network_ip():
     s.close()
     return ip
 def init_connection(address, port, hosting):
-    global peer_found, game_seed
+    global peer_found, game_seed, timeout
     game_seed = int(time.time())
     if hosting:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(15)
             s.bind((address, int(port)-1))
             s.listen()
-            conn, addr = s.accept()
+            try:
+                conn, addr = s.accept()
+            except:
+                timeout = True
+                return False
+
             with conn:
                 conn.send(f'ready,{game_seed}'.encode("utf8"))     
                 conn.close()
@@ -119,6 +126,7 @@ def init_connection(address, port, hosting):
     else:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             try:
+                s.settimeout(4)
                 s.connect((address, int(port)-1))
                 data = s.recv(1024).decode("utf8").split(',')
                 if not 'ready' == data[0]:
