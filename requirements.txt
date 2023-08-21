@@ -1,0 +1,2 @@
+pygame==2.5.1
+pygame-pgu==0.21

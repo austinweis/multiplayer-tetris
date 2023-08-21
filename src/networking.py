@@ -103,6 +103,7 @@ def get_network_ip():
     ip = s.getsockname()[-2]
     s.close()
     return ip
+    
 def init_connection(address, port, hosting):
     global peer_found, game_seed, timeout
     game_seed = int(time.time())
