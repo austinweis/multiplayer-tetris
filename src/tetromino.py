@@ -24,33 +24,36 @@ class Tetromino:
     
     def left(self):
         shape = self.get_shape()
+        left = len(shape[0])
 
         for row in range(len(shape)):
             for col in range(len(shape[row])):
-               if shape[row][col]:
-                    return self.x + col
+               if shape[row][col] and col < left:
+                    left = col
         
-        return self.x
+        return self.x + left
     
     def right(self):
         shape = self.get_shape()
+        right = 0
 
         for row in range(len(shape)):
             for col in range(len(shape[row]) - 1, 0, -1):
-               if shape[row][col]:
-                    return self.x + col
+               if shape[row][col] and col > right:
+                    right = col
         
-        return self.x
+        return self.x + right
     
     def bottom(self):
         shape = self.get_shape()
+        bottom = 0
 
         for row in range(len(shape) - 1, 0, -1):
             for col in range(len(shape[row])):
-               if shape[row][col]:
-                    return self.y + row
+               if shape[row][col] and bottom < row:
+                    bottom = row
         
-        return self.y
+        return self.y + bottom
 
 # Shapes for the tetrominos
 I_SHAPES = [
@@ -73,8 +76,91 @@ O_SHAPES = [
 ]
 
 J_SHAPES = [
-    [[0,0,0,0],
-    [1,0,0,0],
-    [1,1,1,1],
-    [0,0,0,0]]
+    [[1,0,0],
+    [1,1,1],
+    [0,0,0]],
+
+    [[0,1,1],
+    [0,1,0],
+    [0,1,0]],
+
+    [[0,0,0],
+    [1,1,1],
+    [0,0,1]],
+
+    [[0,1,0],
+    [0,1,0],
+    [1,1,0]],
+]
+
+L_SHAPES = [
+    [[0,0,1],
+    [1,1,1],
+    [0,0,0]],
+
+    [[0,1,0],
+    [0,1,0],
+    [0,1,1]],
+
+    [[0,0,0],
+    [1,1,1],
+    [1,0,0]],
+
+    [[1,1,0],
+    [0,1,0],
+    [0,1,0]],
+]
+
+S_SHAPES = [
+    [[0,1,1],
+    [1,1,0],
+    [0,0,0]],
+
+    [[0,1,0],
+    [0,1,1],
+    [0,0,1]],
+
+    [[0,0,0],
+     [0,1,1],
+     [1,1,0]],
+    
+    [[1,0,0,],
+     [1,1,0],
+     [0,1,0]]
+]
+
+T_SHAPES = [
+    [[0,1,0],
+    [1,1,1],
+    [0,0,0]],
+
+    [[0,1,0],
+    [0,1,1],
+    [0,1,0]],
+
+    [[0,0,0],
+     [1,1,1],
+     [0,1,0]],
+    
+    [[0,1,0,],
+     [1,1,0],
+     [0,1,0]]
+]
+
+Z_SHAPES = [
+    [[1,1,0],
+    [0,1,1],
+    [0,0,0]],
+
+    [[0,1,0],
+    [1,1,0],
+    [1,0,0]],
+
+    [[0,0,0],
+     [1,1,0],
+     [0,1,1]],
+    
+    [[0,1,0,],
+     [1,1,0],
+     [1,0,0]]
 ]

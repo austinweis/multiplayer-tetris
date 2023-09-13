@@ -6,7 +6,10 @@ class Grid:
         self.cells = [[None for x in range(width)] for y in range(height)]
     
     def get_cell(self, x, y):
-        return self.cells[y][x]
+        try:
+            return self.cells[y][x]
+        except:
+            return None
     
     def set_cell(self, x, y, color):
         self.cells[y][x] = color

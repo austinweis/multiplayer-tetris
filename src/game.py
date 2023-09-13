@@ -18,25 +18,20 @@ MAX_SPEED = 100
 
 PROTOTYPES = [
     Tetromino(I_SHAPES, 'cyan'),
-    Tetromino(O_SHAPES, 'yellow')
+    Tetromino(O_SHAPES, 'yellow'),
+    Tetromino(J_SHAPES, 'blue'),
+    Tetromino(S_SHAPES, 'green'),
+    Tetromino(T_SHAPES, 'purple'),
+    Tetromino(Z_SHAPES, 'red')
 ]
 
 # game functions
 def check_overlap(block, grid):
-    for row in range(len(block.get_shape()), 0, -1):
-        y = row - 1 + block.y
-        if y < 0:
-            continue
-        if y > grid.cells_y + 1:
-            return True
-
-        if sum(block.get_shape()[row - 1]) == 0:
-            continue
-        
-        grid_row = grid.cells[y][block.left() : block.right()+1]
-        if all(x is None for x in grid_row) == False:
-            return True
-        
+    for row in range(len(block.get_shape())):
+        for col in range(len(block.get_shape()[row])):
+            if grid.get_cell(block.x+col, block.y+row) != None and active_block.get_shape()[row][col] and active_block.y + row >= 0:
+                return True
+    
     return False
 
 def render_tetromino(block):
@@ -50,7 +45,7 @@ def render_tetromino(block):
     # draw the cells
     for row in range(len(shape)):
         for col in range(len(shape[0])):
-            if (shape[row][col]):
+            if (shape[row][col]): 
                 x = off_x + col * GRID_CELL_SIZE
                 y = off_y + row * GRID_CELL_SIZE
 
@@ -103,6 +98,26 @@ while running:
             if event.key == pygame.K_SPACE:
                 while not (active_block.bottom() == grid.cells_y or check_overlap(active_block, grid)):
                     active_block.y += 1
+                active_block.move(0, -1)
+                shape = active_block.get_shape()
+                for row in range(len(shape)):
+                    for col in range(len(shape[0])):
+                        if (shape[row][col]):
+                            grid.set_cell(active_block.x + col, active_block.y + row, active_block.color)
+                row = grid.cells_y
+                while row != 0:
+                    row -= 1
+                    count = 0
+                    for col in range(grid.cells_x):
+                        if (grid.cells[row][col]):
+                            count += 1
+                    if count == grid.cells_x:
+                        grid.cells[row] = [None for x in range(grid.cells_x)]
+                        grid.cells.insert(0, grid.cells.pop(row))
+                        row += 1
+
+                active_block = new_tetromino()
+                
             # speed fall rate
             if event.key == pygame.K_s or event.key == pygame.K_DOWN:
                 game_speed = MAX_SPEED
