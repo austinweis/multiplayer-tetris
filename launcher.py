@@ -28,14 +28,12 @@ def main():
     clock = pygame.time.Clock()
     runtime = 0
 
-    error_timer = 1000
+    error_timer = 1500
     error = False
 
     # general elements
     error1 = gui.Label((640, 250), 'red', 'game not found')
-    error2 = gui.Label((640, 250), 'red', 'timeout')
     error1.toggle()
-    error2.toggle()
 
     connecting = gui.Label((640, 250), 'yellow', 'connecting...')
     wait_connect = gui.Label((640, 250), 'yellow', 'waiting for connection...')
@@ -65,6 +63,8 @@ def main():
     current_scene = None
     previous_scene = None
 
+
+
     switch_scene(main_scene)
 
     running = True
@@ -85,6 +85,7 @@ def main():
                 pygame.display.quit()
                 pygame.quit()
                 sys.exit()
+                running = False
             event_result = gui.call(event)
             if event_result == client:
                 switch_scene(client_scene)
@@ -92,8 +93,6 @@ def main():
                 switch_scene(server_scene)
             if event_result == connect and error == False and not network_thread.is_alive():
                 connecting.toggle()
-                gui.draw(screen)
-                pygame.display.update()
                 network_thread = threading.Thread(target=networking.init_connection, args=(server_ip.text, server_port.text, False))
                 network_thread.start()
                 network_thread.join()
@@ -120,15 +119,6 @@ def main():
                 error = False
                 error_timer = 1000
                 error1.toggle()
-        if networking.timeout:
-            if error_timer == 1000:
-                wait_connect.toggle()
-                error2.toggle()
-            error_timer-=60.24
-            if error_timer<=0:   
-                networking.timeout = False
-                error_timer = 1000
-                error2.toggle()               
 
 if __name__ == "__main__":
     main()
